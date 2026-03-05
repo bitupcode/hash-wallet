@@ -2,11 +2,12 @@
 
 import { useState } from "react"
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
@@ -43,7 +44,6 @@ export function SignerTransactionDetail({
   const session = mpcSessions.find((s) => s.id === transaction.mpcSessionId)
   if (!session) return null
 
-  // Map operator role to signer role (signer1 stays signer1, signer2 stays signer2)
   const currentSigner = currentRole as SignerRole
   const hasVoted =
     session.signersApproved.includes(currentSigner) ||
@@ -70,16 +70,17 @@ export function SignerTransactionDetail({
 
   return (
     <>
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+      <Sheet open={open} onOpenChange={onOpenChange}>
+        <SheetContent>
+          <SheetHeader>
+            <SheetTitle className="flex items-center gap-2">
               Подписание
               <StatusBadge status={transaction.status} />
-            </DialogTitle>
-          </DialogHeader>
+            </SheetTitle>
+            <SheetDescription className="sr-only">Подписание транзакции</SheetDescription>
+          </SheetHeader>
 
-          <div className="space-y-3 text-sm">
+          <div className="space-y-3 text-sm mt-4">
             <div className="flex justify-between items-center">
               <span className="text-muted-foreground">Отправитель</span>
               <BtcAddress address={transaction.fromAddress} full />
@@ -173,7 +174,7 @@ export function SignerTransactionDetail({
           </div>
 
           {canVote && (
-            <div className="flex gap-2 pt-2">
+            <div className="flex gap-2 pt-4">
               <Button
                 className="flex-1 bg-green-600 hover:bg-green-700 text-white"
                 onClick={() => setShowApproveConfirm(true)}
@@ -193,12 +194,12 @@ export function SignerTransactionDetail({
           )}
 
           {hasVoted && (
-            <div className="text-sm text-muted-foreground text-center py-2">
+            <div className="text-sm text-muted-foreground text-center py-4">
               Вы уже проголосовали по этой транзакции.
             </div>
           )}
-        </DialogContent>
-      </Dialog>
+        </SheetContent>
+      </Sheet>
 
       <ConfirmDialog
         open={showApproveConfirm}

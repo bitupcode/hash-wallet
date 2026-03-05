@@ -2,12 +2,13 @@
 
 import { useState } from "react"
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog"
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetFooter,
+} from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -15,6 +16,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Loader2 } from "lucide-react"
+import { CopyButton } from "@/components/common/copy-button"
 import { ConfirmDialog } from "@/components/common/confirm-dialog"
 import { useAddressStore, useTransactionStore } from "@/store"
 import { formatBtc, mockDelay } from "@/lib/utils"
@@ -113,16 +115,17 @@ export function TransferWizard({
 
   return (
     <>
-      <Dialog open={open} onOpenChange={handleClose}>
-        <DialogContent className="max-w-lg w-full min-h-[520px] flex flex-col">
-          <DialogHeader>
-            <DialogTitle>
+      <Sheet open={open} onOpenChange={handleClose}>
+        <SheetContent className="flex flex-col">
+          <SheetHeader>
+            <SheetTitle>
               Перевод средств — Шаг {step}/2
-            </DialogTitle>
-          </DialogHeader>
+            </SheetTitle>
+            <SheetDescription className="sr-only">Мастер перевода средств</SheetDescription>
+          </SheetHeader>
 
           {step === 1 && (
-            <div className="space-y-4 py-2 flex-1">
+            <div className="space-y-4 pt-6 flex-1">
               <div className="text-sm text-muted-foreground">
                 Отправитель:{" "}
                 <span className="font-medium text-foreground">
@@ -255,29 +258,31 @@ export function TransferWizard({
           )}
 
           {step === 2 && (
-            <div className="space-y-3 py-2 text-sm flex-1">
-              <div className="space-y-1">
+            <div className="space-y-4 pt-6 text-sm flex-1">
+              <div className="space-y-1.5">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Отправитель</span>
                   <span className="font-medium">{sourceAddress.name}</span>
                 </div>
-                <div className="text-right">
-                  <span className="font-mono text-xs text-muted-foreground break-all">
+                <div className="flex items-start justify-end gap-1">
+                  <span className="font-mono text-sm text-foreground/70 break-all">
                     {sourceAddress.address}
                   </span>
+                  <CopyButton text={sourceAddress.address} />
                 </div>
               </div>
-              <div className="space-y-1">
+              <div className="space-y-1.5">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Получатель</span>
                   {matchedAddress && (
                     <span className="font-medium">{matchedAddress.name}</span>
                   )}
                 </div>
-                <div className="text-right">
-                  <span className="font-mono text-xs text-muted-foreground break-all">
+                <div className="flex items-start justify-end gap-1">
+                  <span className="font-mono text-sm text-foreground/70 break-all">
                     {toAddress}
                   </span>
+                  <CopyButton text={toAddress} />
                 </div>
               </div>
               <div className="flex justify-between">
@@ -304,19 +309,21 @@ export function TransferWizard({
               {comment && (
                 <>
                   <Separator />
-                  <div className="flex justify-between">
+                  <div className="space-y-1">
                     <span className="text-muted-foreground">Комментарий</span>
-                    <span className="max-w-[200px] text-right">{comment}</span>
+                    <p className="text-sm">{comment}</p>
                   </div>
                 </>
               )}
             </div>
           )}
 
-          <DialogFooter>
+          <SheetFooter className="mt-auto pt-4">
             {step > 1 && (
               <Button
                 variant="outline"
+                size="lg"
+                className="px-8"
                 onClick={() => setStep(1)}
                 disabled={submitting}
               >
@@ -324,12 +331,14 @@ export function TransferWizard({
               </Button>
             )}
             {step === 1 && (
-              <Button disabled={!canProceed} onClick={() => setStep(2)}>
+              <Button size="lg" className="px-8" disabled={!canProceed} onClick={() => setStep(2)}>
                 Далее
               </Button>
             )}
             {step === 2 && (
               <Button
+                size="lg"
+                className="px-8"
                 disabled={submitting}
                 onClick={() => setShowConfirm(true)}
               >
@@ -337,9 +346,9 @@ export function TransferWizard({
                 Подтвердить перевод
               </Button>
             )}
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
 
       <ConfirmDialog
         open={showConfirm}

@@ -2,11 +2,12 @@
 
 import { useState } from "react"
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
@@ -82,16 +83,17 @@ export function TransactionDetailModal({
 
   return (
     <>
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+      <Sheet open={open} onOpenChange={onOpenChange}>
+        <SheetContent>
+          <SheetHeader>
+            <SheetTitle className="flex items-center gap-2">
               Транзакция
               <StatusBadge status={transaction.status} />
-            </DialogTitle>
-          </DialogHeader>
+            </SheetTitle>
+            <SheetDescription className="sr-only">Детали транзакции</SheetDescription>
+          </SheetHeader>
 
-          <div className="space-y-3 text-sm">
+          <div className="space-y-3 text-sm mt-4">
             <div className="flex justify-between items-center">
               <span className="text-muted-foreground">Тип</span>
               <div className="flex items-center gap-2">
@@ -112,14 +114,14 @@ export function TransactionDetailModal({
             </div>
 
             {/* Отправитель */}
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">Отправитель</span>
                 {fromAddrObj && (
                   <span className="text-sm">{fromAddrObj.name}</span>
                 )}
               </div>
-              <div className="text-right">
+              <div className="text-right text-foreground/70">
                 <BtcAddress address={transaction.fromAddress} full />
               </div>
             </div>
@@ -130,7 +132,7 @@ export function TransactionDetailModal({
                 <span className="text-muted-foreground text-xs">
                   Все адреса отправителей ({allFromAddresses.length}):
                 </span>
-                <div className="space-y-1 pl-2 border-l-2 border-muted">
+                <div className="space-y-1 pl-2 border-l-2 border-muted text-foreground/70">
                   {allFromAddresses.map((addr, i) => (
                     <div key={i}>
                       <BtcAddress address={addr} full />
@@ -141,14 +143,14 @@ export function TransactionDetailModal({
             )}
 
             {/* Получатель */}
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">Получатель</span>
                 {toAddrObj && (
                   <span className="text-sm">{toAddrObj.name}</span>
                 )}
               </div>
-              <div className="text-right">
+              <div className="text-right text-foreground/70">
                 <BtcAddress address={transaction.toAddress} full />
               </div>
             </div>
@@ -226,9 +228,9 @@ export function TransactionDetailModal({
                       <div key={s} className="flex justify-between text-xs">
                         <span>{SIGNER_NAMES[s]}</span>
                         <span>
-                          {approved && "✅ Подтвердил"}
-                          {rejected && "❌ Отклонил"}
-                          {!approved && !rejected && "⏳ Ожидание"}
+                          {approved && "Подтвердил"}
+                          {rejected && "Отклонил"}
+                          {!approved && !rejected && "Ожидание"}
                         </span>
                       </div>
                     )
@@ -240,11 +242,11 @@ export function TransactionDetailModal({
             {transaction.comment && !isInbound && (
               <>
                 <Separator />
-                <div className="flex justify-between">
+                <div className="space-y-1">
                   <span className="text-muted-foreground">Комментарий</span>
-                  <span className="max-w-[250px] text-right">
+                  <p className="text-sm">
                     {transaction.comment}
-                  </span>
+                  </p>
                 </div>
               </>
             )}
@@ -256,7 +258,7 @@ export function TransactionDetailModal({
           </div>
 
           {canCancel && (
-            <div className="pt-2">
+            <div className="pt-4">
               <Button
                 variant="destructive"
                 size="sm"
@@ -267,8 +269,8 @@ export function TransactionDetailModal({
               </Button>
             </div>
           )}
-        </DialogContent>
-      </Dialog>
+        </SheetContent>
+      </Sheet>
 
       <ConfirmDialog
         open={showCancelConfirm}

@@ -2,12 +2,13 @@
 
 import { useState } from "react"
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog"
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetFooter,
+} from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -49,12 +50,13 @@ export function CreateAddressDialog({
 
   return (
     <>
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Создать новый адрес</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-2">
+      <Sheet open={open} onOpenChange={onOpenChange}>
+        <SheetContent>
+          <SheetHeader>
+            <SheetTitle>Создать новый адрес</SheetTitle>
+            <SheetDescription className="sr-only">Создание нового адреса</SheetDescription>
+          </SheetHeader>
+          <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label htmlFor="name">Имя адреса</Label>
               <Input
@@ -84,16 +86,16 @@ export function CreateAddressDialog({
               <Input value="BITCOIN" disabled />
             </div>
           </div>
-          <DialogFooter>
+          <SheetFooter>
             <Button variant="outline" onClick={() => onOpenChange(false)}>
               Отмена
             </Button>
             <Button disabled={!canSubmit} onClick={() => setShowConfirm(true)}>
               Создать
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
 
       <ConfirmDialog
         open={showConfirm}
