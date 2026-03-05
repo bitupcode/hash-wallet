@@ -14,7 +14,7 @@ import { StatusBadge } from "@/components/common/status-badge"
 import { BtcAddress } from "@/components/common/btc-address"
 import { CopyButton } from "@/components/common/copy-button"
 import { ConfirmDialog } from "@/components/common/confirm-dialog"
-import { useTransactionStore, useAuthStore } from "@/store"
+import { useTransactionStore, useAuthStore, useAddressStore } from "@/store"
 import { formatBtc } from "@/lib/utils"
 import { SIGNER_NAMES } from "@/types"
 import type { Transaction } from "@/types"
@@ -27,6 +27,16 @@ interface TransactionDetailModalProps {
   onOpenChange: (open: boolean) => void
 }
 
+function getTypeLabel(tx: Transaction): string {
+  if (tx.type === "INTERNAL") return "Внутренний"
+  return "Внешний"
+}
+
+function getDirectionLabel(tx: Transaction): string | null {
+  if (tx.type !== "EXTERNAL") return null
+  return tx.direction === "INBOUND" ? "Входящий" : "Исходящий"
+}
+
 export function TransactionDetailModal({
   transaction,
   open,
@@ -36,10 +46,16 @@ export function TransactionDetailModal({
   const cancelTransaction = useTransactionStore((s) => s.cancelTransaction)
   const mpcSessions = useTransactionStore((s) => s.mpcSessions)
   const currentRole = useAuthStore((s) => s.currentRole)
+  const addresses = useAddressStore((s) => s.addresses)
 
   if (!transaction) return null
 
   const session = mpcSessions.find((s) => s.id === transaction.mpcSessionId)
+
+  const fromAddrObj = addresses.find((a) => a.address === transaction.fromAddress)
+  const toAddrObj = addresses.find((a) => a.address === transaction.toAddress)
+
+  const isInbound = transaction.direction === "INBOUND"
 
   const canCancel =
     currentRole === "operator" &&
@@ -58,6 +74,12 @@ export function TransactionDetailModal({
     }
   }
 
+  const allFromAddresses = transaction.fromAddresses && transaction.fromAddresses.length > 1
+    ? transaction.fromAddresses
+    : null
+
+  const directionLabel = getDirectionLabel(transaction)
+
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
@@ -70,40 +92,93 @@ export function TransactionDetailModal({
           </DialogHeader>
 
           <div className="space-y-3 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">ID</span>
-              <span className="font-mono text-xs">{transaction.id.slice(0, 12)}...</span>
-            </div>
-            <div className="flex justify-between">
+            <div className="flex justify-between items-center">
               <span className="text-muted-foreground">Тип</span>
-              <Badge variant="outline">{transaction.type}</Badge>
+              <div className="flex items-center gap-2">
+                <Badge variant="outline">{getTypeLabel(transaction)}</Badge>
+                {directionLabel && (
+                  <Badge
+                    variant="outline"
+                    className={
+                      isInbound
+                        ? "bg-green-50 text-green-700 border-green-300"
+                        : "bg-orange-50 text-orange-700 border-orange-300"
+                    }
+                  >
+                    {directionLabel}
+                  </Badge>
+                )}
+              </div>
             </div>
-            <div className="flex justify-between items-center">
+
+            {/* Отправитель */}
+            <div className="flex justify-between items-start">
               <span className="text-muted-foreground">Отправитель</span>
-              <BtcAddress address={transaction.fromAddress} />
+              <div className="text-right">
+                {fromAddrObj && (
+                  <div className="text-xs text-muted-foreground mb-0.5">
+                    {fromAddrObj.name}
+                  </div>
+                )}
+                <BtcAddress address={transaction.fromAddress} full />
+              </div>
             </div>
-            <div className="flex justify-between items-center">
+
+            {/* Все адреса отправителей для INBOUND */}
+            {allFromAddresses && (
+              <div className="space-y-1">
+                <span className="text-muted-foreground text-xs">
+                  Все адреса отправителей ({allFromAddresses.length}):
+                </span>
+                <div className="space-y-1 pl-2 border-l-2 border-muted">
+                  {allFromAddresses.map((addr, i) => (
+                    <div key={i}>
+                      <BtcAddress address={addr} full />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Получатель */}
+            <div className="flex justify-between items-start">
               <span className="text-muted-foreground">Получатель</span>
-              <BtcAddress address={transaction.toAddress} />
+              <div className="text-right">
+                {toAddrObj && (
+                  <div className="text-xs text-muted-foreground mb-0.5">
+                    {toAddrObj.name}
+                  </div>
+                )}
+                <BtcAddress address={transaction.toAddress} full />
+              </div>
             </div>
-            <Separator />
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Сумма</span>
-              <span className="font-mono">{formatBtc(transaction.amount)} BTC</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Комиссия</span>
-              <span className="font-mono">{formatBtc(transaction.fee)} BTC</span>
-            </div>
-            <div className="flex justify-between font-semibold">
-              <span>Итого</span>
-              <span className="font-mono">
-                {formatBtc(transaction.amount + transaction.fee)} BTC
-              </span>
-            </div>
+
             <Separator />
 
-            {transaction.txHash && (
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Сумма к получению</span>
+              <span className="font-mono">{formatBtc(transaction.amount)} BTC</span>
+            </div>
+
+            {!isInbound && (
+              <>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Комиссия сети</span>
+                  <span className="font-mono">{formatBtc(transaction.fee)} BTC</span>
+                </div>
+                <div className="flex justify-between font-semibold">
+                  <span>Сумма списания</span>
+                  <span className="font-mono">
+                    {formatBtc(transaction.amount + transaction.fee)} BTC
+                  </span>
+                </div>
+              </>
+            )}
+
+            <Separator />
+
+            {/* TX Hash — только для COMPLETED */}
+            {transaction.status === "COMPLETED" && transaction.txHash && (
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">TX Hash</span>
                 <span className="flex items-center gap-1">
@@ -112,7 +187,7 @@ export function TransactionDetailModal({
                   </span>
                   <CopyButton text={transaction.txHash} />
                   <a
-                    href={`https://www.blockchain.com/btc/tx/${transaction.txHash}`}
+                    href={`https://btcscan.org/tx/${transaction.txHash}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-muted-foreground hover:text-foreground"
@@ -124,16 +199,11 @@ export function TransactionDetailModal({
               </div>
             )}
 
-            {transaction.kytScore !== null && (
+            {/* Инициатор */}
+            {transaction.initiatorName && (
               <div className="flex justify-between">
-                <span className="text-muted-foreground">KYT Score</span>
-                <span
-                  className={
-                    transaction.kytScore <= 20 ? "text-green-600" : "text-red-600"
-                  }
-                >
-                  {transaction.kytScore}%
-                </span>
+                <span className="text-muted-foreground">Инициатор</span>
+                <span>{transaction.initiatorName}</span>
               </div>
             )}
 
@@ -167,7 +237,7 @@ export function TransactionDetailModal({
               </>
             )}
 
-            {transaction.comment && (
+            {transaction.comment && !isInbound && (
               <>
                 <Separator />
                 <div className="flex justify-between">

@@ -10,18 +10,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { BtcAddress } from "@/components/common/btc-address"
 import { AddressSearch } from "./address-search"
 import { CreateAddressDialog } from "./create-address-dialog"
 import { EmptyState } from "@/components/common/empty-state"
+import { CopyButton } from "@/components/common/copy-button"
 import { useAddressStore } from "@/store"
-import { formatBtc } from "@/lib/utils"
 import { Plus, Wallet, ArrowUpDown } from "lucide-react"
-import type { Address } from "@/types"
 
-type SortField = "name" | "balance" | "createdAt"
+type SortField = "name" | "createdAt"
 type SortDir = "asc" | "desc"
 
 const PAGE_SIZE = 10
@@ -62,7 +59,6 @@ export function AddressTable() {
     items = [...items].sort((a, b) => {
       let cmp = 0
       if (sortField === "name") cmp = a.name.localeCompare(b.name)
-      else if (sortField === "balance") cmp = a.balance - b.balance
       else cmp = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
       return sortDir === "asc" ? cmp : -cmp
     })
@@ -119,12 +115,9 @@ export function AddressTable() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Адрес</TableHead>
-              <SortHeader field="name">Имя</SortHeader>
-              <TableHead>Тип</TableHead>
+              <TableHead className="pl-4">Адрес</TableHead>
+              <SortHeader field="name">Имя адреса</SortHeader>
               <TableHead>Сеть</TableHead>
-              <SortHeader field="balance">Баланс (BTC)</SortHeader>
-              <SortHeader field="createdAt">Дата</SortHeader>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -134,21 +127,15 @@ export function AddressTable() {
                 className="cursor-pointer"
                 onClick={() => router.push(`/addresses/${addr.id}`)}
               >
-                <TableCell>
-                  <BtcAddress address={addr.address} />
+                <TableCell className="pl-4">
+                  <span className="inline-flex items-center gap-1 font-mono text-sm">
+                    <span className="break-all">{addr.address}</span>
+                    <CopyButton text={addr.address} />
+                  </span>
                 </TableCell>
                 <TableCell className="font-medium">{addr.name}</TableCell>
-                <TableCell>
-                  <Badge variant="outline">{addr.type}</Badge>
-                </TableCell>
-                <TableCell className="text-muted-foreground">
-                  {addr.network}
-                </TableCell>
-                <TableCell className="font-mono">
-                  {formatBtc(addr.balance)}
-                </TableCell>
-                <TableCell className="text-muted-foreground">
-                  {new Date(addr.createdAt).toLocaleDateString("ru-RU")}
+                <TableCell className="text-muted-foreground whitespace-nowrap">
+                  Bitcoin (BTC)
                 </TableCell>
               </TableRow>
             ))}

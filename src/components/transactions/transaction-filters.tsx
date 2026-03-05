@@ -60,7 +60,7 @@ export function TransactionFilters({
           <SelectItem value="DRAFT">Черновик</SelectItem>
           <SelectItem value="WAITING_MPC">Ожидание подписей</SelectItem>
           <SelectItem value="MPC_SIGNING">Подписание</SelectItem>
-          <SelectItem value="COMPLETED">Завершена</SelectItem>
+          <SelectItem value="COMPLETED">Исполнена</SelectItem>
           <SelectItem value="REJECTED">Отклонена</SelectItem>
           <SelectItem value="FAILED">Ошибка</SelectItem>
         </SelectContent>
@@ -75,8 +75,8 @@ export function TransactionFilters({
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="ALL">Все типы</SelectItem>
-          <SelectItem value="INTERNAL">Internal</SelectItem>
-          <SelectItem value="EXTERNAL">External</SelectItem>
+          <SelectItem value="INTERNAL">Внутренний</SelectItem>
+          <SelectItem value="EXTERNAL">Внешний</SelectItem>
         </SelectContent>
       </Select>
 

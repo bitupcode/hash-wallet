@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import {
   Dialog,
   DialogContent,
@@ -17,7 +17,7 @@ import { Separator } from "@/components/ui/separator"
 import { Loader2 } from "lucide-react"
 import { ConfirmDialog } from "@/components/common/confirm-dialog"
 import { useAddressStore, useTransactionStore } from "@/store"
-import { formatBtc, mockDelay, generateKytScore } from "@/lib/utils"
+import { formatBtc, mockDelay } from "@/lib/utils"
 import { NETWORK_FEE, DUST_RESERVE } from "@/types"
 import type { Address } from "@/types"
 import { toast } from "sonner"
@@ -29,13 +29,9 @@ interface TransferWizardProps {
 }
 
 function isValidBtcAddress(address: string): boolean {
-  // Legacy (1...)
   if (/^1[a-km-zA-HJ-NP-Z1-9]{25,34}$/.test(address)) return true
-  // P2SH (3...)
   if (/^3[a-km-zA-HJ-NP-Z1-9]{25,34}$/.test(address)) return true
-  // Bech32 (bc1q...)
   if (/^bc1q[a-z0-9]{38,58}$/.test(address)) return true
-  // Bech32m / Taproot (bc1p...)
   if (/^bc1p[a-z0-9]{38,58}$/.test(address)) return true
   return false
 }
@@ -49,8 +45,6 @@ export function TransferWizard({
   const [toAddress, setToAddress] = useState("")
   const [amount, setAmount] = useState("")
   const [comment, setComment] = useState("")
-  const [kytScore, setKytScore] = useState<number | null>(null)
-  const [kytLoading, setKytLoading] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [showDropdown, setShowDropdown] = useState(false)
@@ -65,7 +59,6 @@ export function TransferWizard({
 
   const isInternal = addresses.some((a) => a.address === toAddress)
 
-  // Validation
   const errors: string[] = []
   if (amountNum <= 0 && amount.length > 0) errors.push("Сумма должна быть больше 0")
   if (amountNum > 0 && totalDeduction > sourceAddress.balance)
@@ -90,8 +83,6 @@ export function TransferWizard({
     setToAddress("")
     setAmount("")
     setComment("")
-    setKytScore(null)
-    setKytLoading(false)
     setSubmitting(false)
   }
 
@@ -99,18 +90,6 @@ export function TransferWizard({
     if (!v) reset()
     onOpenChange(v)
   }
-
-  // Step 2: KYT check
-  useEffect(() => {
-    if (step === 2 && !kytLoading && kytScore === null) {
-      setKytLoading(true)
-      mockDelay(2000).then(() => {
-        const score = generateKytScore()
-        setKytScore(score)
-        setKytLoading(false)
-      })
-    }
-  }, [step, kytLoading, kytScore])
 
   const handleSubmit = async () => {
     setSubmitting(true)
@@ -121,7 +100,6 @@ export function TransferWizard({
       toAddress,
       amount: amountNum,
       comment,
-      kytScore: kytScore ?? 0,
     })
     setSubmitting(false)
     if (tx) {
@@ -138,7 +116,7 @@ export function TransferWizard({
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>
-              Перевод средств — Шаг {step}/3
+              Перевод средств — Шаг {step}/2
             </DialogTitle>
           </DialogHeader>
 
@@ -271,50 +249,6 @@ export function TransferWizard({
           )}
 
           {step === 2 && (
-            <div className="py-8 flex flex-col items-center gap-4">
-              {kytLoading ? (
-                <>
-                  <Loader2 className="size-8 animate-spin text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground">
-                    Проверка BitOk KYT...
-                  </p>
-                </>
-              ) : kytScore !== null ? (
-                <>
-                  <div className="text-center space-y-2">
-                    <div className="text-sm text-muted-foreground">
-                      KYT Risk Score
-                    </div>
-                    <div
-                      className={`text-3xl font-bold ${
-                        kytScore <= 20 ? "text-green-600" : "text-red-600"
-                      }`}
-                    >
-                      {kytScore}%
-                    </div>
-                    <Badge
-                      variant="outline"
-                      className={
-                        kytScore <= 20
-                          ? "bg-green-50 text-green-700 border-green-300"
-                          : "bg-red-50 text-red-700 border-red-300"
-                      }
-                    >
-                      {kytScore <= 20 ? "Низкий риск" : "Повышенный риск"}
-                    </Badge>
-                    {kytScore > 20 && (
-                      <p className="text-xs text-muted-foreground mt-2">
-                        Высокий KYT score. Перевод не заблокирован, но
-                        рекомендуется проверить получателя.
-                      </p>
-                    )}
-                  </div>
-                </>
-              ) : null}
-            </div>
-          )}
-
-          {step === 3 && (
             <div className="space-y-3 py-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Отправитель</span>
@@ -329,7 +263,7 @@ export function TransferWizard({
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Тип</span>
                 <Badge variant="outline">
-                  {isInternal ? "INTERNAL" : "EXTERNAL"}
+                  {isInternal ? "Внутренний" : "Внешний"}
                 </Badge>
               </div>
               <Separator />
@@ -347,22 +281,14 @@ export function TransferWizard({
                   {formatBtc(totalDeduction)} BTC
                 </span>
               </div>
-              <Separator />
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">KYT Score</span>
-                <span
-                  className={
-                    (kytScore ?? 0) <= 20 ? "text-green-600" : "text-red-600"
-                  }
-                >
-                  {kytScore}%
-                </span>
-              </div>
               {comment && (
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Комментарий</span>
-                  <span className="max-w-[200px] text-right">{comment}</span>
-                </div>
+                <>
+                  <Separator />
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Комментарий</span>
+                    <span className="max-w-[200px] text-right">{comment}</span>
+                  </div>
+                </>
               )}
             </div>
           )}
@@ -371,7 +297,7 @@ export function TransferWizard({
             {step > 1 && (
               <Button
                 variant="outline"
-                onClick={() => setStep((s) => s - 1)}
+                onClick={() => setStep(1)}
                 disabled={submitting}
               >
                 Назад
@@ -383,14 +309,6 @@ export function TransferWizard({
               </Button>
             )}
             {step === 2 && (
-              <Button
-                disabled={kytLoading}
-                onClick={() => setStep(3)}
-              >
-                Далее
-              </Button>
-            )}
-            {step === 3 && (
               <Button
                 disabled={submitting}
                 onClick={() => setShowConfirm(true)}

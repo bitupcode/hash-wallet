@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { useAuthStore } from "@/store"
 import type { Role } from "@/types"
-import { ROLE_NAMES } from "@/types"
+import { ROLE_NAMES, ROLE_FULL_NAMES } from "@/types"
 
 const roles: Role[] = ["operator", "signer1", "signer2"]
 
@@ -27,7 +27,8 @@ export function Header() {
   return (
     <header className="h-16 border-b flex items-center justify-between px-6 bg-background">
       <div className="text-sm text-muted-foreground">
-        Роль: <span className="font-semibold text-foreground">{ROLE_NAMES[currentRole]}</span>
+        Роль: <span className="font-semibold text-foreground">{ROLE_NAMES[currentRole]}</span>{" "}
+        <span className="text-foreground">{ROLE_FULL_NAMES[currentRole]}</span>
       </div>
       <div className="flex gap-1">
         {roles.map((role) => (

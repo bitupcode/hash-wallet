@@ -9,7 +9,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { StatusBadge } from "@/components/common/status-badge"
 import { BtcAddress } from "@/components/common/btc-address"
@@ -18,10 +17,18 @@ import { TransactionDetailModal } from "./transaction-detail-modal"
 import { EmptyState } from "@/components/common/empty-state"
 import { useTransactionStore } from "@/store"
 import { formatBtc } from "@/lib/utils"
-import { History } from "lucide-react"
+import { History, ArrowUpRight, ArrowDownLeft, ArrowLeftRight } from "lucide-react"
 import type { Transaction, TransactionStatus, TransactionType } from "@/types"
 
 const PAGE_SIZE = 10
+
+function DirectionIcon({ tx }: { tx: Transaction }) {
+  if (tx.type === "INTERNAL")
+    return <ArrowLeftRight className="size-4 text-blue-500" />
+  if (tx.direction === "INBOUND")
+    return <ArrowDownLeft className="size-4 text-green-600" />
+  return <ArrowUpRight className="size-4 text-orange-500" />
+}
 
 export function TransactionTable() {
   const transactions = useTransactionStore((s) => s.transactions)
@@ -98,45 +105,65 @@ export function TransactionTable() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>ID</TableHead>
-              <TableHead>Тип</TableHead>
+              <TableHead className="w-10"></TableHead>
+              <TableHead>Дата и время</TableHead>
               <TableHead>Отправитель</TableHead>
               <TableHead>Получатель</TableHead>
-              <TableHead>Сумма (BTC)</TableHead>
+              <TableHead>Сеть</TableHead>
               <TableHead>Статус</TableHead>
-              <TableHead>Дата</TableHead>
+              <TableHead>Сумма (BTC)</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {paged.map((tx) => (
-              <TableRow
-                key={tx.id}
-                className="cursor-pointer"
-                onClick={() => setSelectedTx(tx)}
-              >
-                <TableCell className="font-mono text-xs">
-                  {tx.id.slice(0, 8)}...
-                </TableCell>
-                <TableCell>
-                  <Badge variant="outline">{tx.type}</Badge>
-                </TableCell>
-                <TableCell>
-                  <BtcAddress address={tx.fromAddress} />
-                </TableCell>
-                <TableCell>
-                  <BtcAddress address={tx.toAddress} />
-                </TableCell>
-                <TableCell className="font-mono">
-                  {formatBtc(tx.amount)}
-                </TableCell>
-                <TableCell>
-                  <StatusBadge status={tx.status} />
-                </TableCell>
-                <TableCell className="text-muted-foreground">
-                  {new Date(tx.createdAt).toLocaleDateString("ru-RU")}
-                </TableCell>
-              </TableRow>
-            ))}
+            {paged.map((tx) => {
+              const senderCount =
+                tx.fromAddresses && tx.fromAddresses.length > 1
+                  ? tx.fromAddresses.length - 1
+                  : 0
+              return (
+                <TableRow
+                  key={tx.id}
+                  className="cursor-pointer"
+                  onClick={() => setSelectedTx(tx)}
+                >
+                  <TableCell>
+                    <DirectionIcon tx={tx} />
+                  </TableCell>
+                  <TableCell className="text-muted-foreground whitespace-nowrap">
+                    {new Date(tx.createdAt).toLocaleString("ru-RU", {
+                      day: "2-digit",
+                      month: "2-digit",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      second: "2-digit",
+                    })}
+                  </TableCell>
+                  <TableCell>
+                    <span className="inline-flex items-center gap-1">
+                      <BtcAddress address={tx.fromAddress} />
+                      {senderCount > 0 && (
+                        <span className="text-xs text-muted-foreground">
+                          (+{senderCount})
+                        </span>
+                      )}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <BtcAddress address={tx.toAddress} />
+                  </TableCell>
+                  <TableCell className="text-muted-foreground whitespace-nowrap text-xs">
+                    Bitcoin (BTC)
+                  </TableCell>
+                  <TableCell>
+                    <StatusBadge status={tx.status} />
+                  </TableCell>
+                  <TableCell className="font-mono">
+                    {formatBtc(tx.amount)}
+                  </TableCell>
+                </TableRow>
+              )
+            })}
           </TableBody>
         </Table>
       </div>

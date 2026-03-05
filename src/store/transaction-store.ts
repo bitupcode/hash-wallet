@@ -10,8 +10,9 @@ import {
   NETWORK_FEE,
   MPC_DEADLINE_MINUTES,
   REQUIRED_SIGNATURES,
+  ROLE_FULL_NAMES,
 } from "@/types"
-import { generateId, generateTxHash, generateKytScore } from "@/lib/utils"
+import { generateId, generateTxHash } from "@/lib/utils"
 import { useAddressStore } from "./address-store"
 import { useAuditStore } from "./audit-store"
 
@@ -21,7 +22,6 @@ interface CreateTransactionParams {
   toAddress: string
   amount: number
   comment: string
-  kytScore: number
 }
 
 interface TransactionStore {
@@ -44,7 +44,7 @@ export const useTransactionStore = create<TransactionStore>()(
       setMpcSessions: (sessions) => set({ mpcSessions: sessions }),
 
       createTransaction: (params) => {
-        const { fromAddressId, fromAddress, toAddress, amount, comment, kytScore } = params
+        const { fromAddressId, fromAddress, toAddress, amount, comment } = params
         const addressStore = useAddressStore.getState()
         const source = addressStore.addresses.find((a) => a.id === fromAddressId)
         if (!source) return null
@@ -52,7 +52,6 @@ export const useTransactionStore = create<TransactionStore>()(
         if (amount + NETWORK_FEE > source.balance) return null
         if (fromAddress === toAddress) return null
 
-        // Determine type
         const isInternal = addressStore.addresses.some((a) => a.address === toAddress)
         const txId = generateId()
         const mpcId = generateId()
@@ -64,6 +63,7 @@ export const useTransactionStore = create<TransactionStore>()(
         const newTx: Transaction = {
           id: txId,
           type: isInternal ? "INTERNAL" : "EXTERNAL",
+          direction: isInternal ? undefined : "OUTBOUND",
           fromAddressId,
           fromAddress,
           toAddress,
@@ -71,8 +71,8 @@ export const useTransactionStore = create<TransactionStore>()(
           fee: NETWORK_FEE,
           status: "WAITING_MPC",
           txHash: null,
-          kytScore,
           comment,
+          initiatorName: ROLE_FULL_NAMES.operator,
           mpcSessionId: mpcId,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
@@ -145,7 +145,6 @@ export const useTransactionStore = create<TransactionStore>()(
         const session = state.mpcSessions.find((s) => s.id === tx.mpcSessionId)
         if (!session) return
 
-        // Check if already voted
         if (
           session.signersApproved.includes(signer) ||
           session.signersRejected.includes(signer)
@@ -163,12 +162,10 @@ export const useTransactionStore = create<TransactionStore>()(
         let txHash = tx.txHash
 
         if (newApproved.length >= REQUIRED_SIGNATURES) {
-          // Completed — deduct balance
           newStatus = "COMPLETED"
           txHash = generateTxHash()
           useAddressStore.getState().deductBalance(tx.fromAddressId, tx.amount + tx.fee)
         } else if (newRejected.length >= 2) {
-          // Can't reach quorum
           newStatus = "REJECTED"
         } else {
           newStatus = "MPC_SIGNING"
@@ -195,7 +192,7 @@ export const useTransactionStore = create<TransactionStore>()(
           entityType: "transaction",
           entityId: txId,
           details: approve
-            ? `Подпись ${newApproved.length}/${REQUIRED_SIGNATURES}${newStatus === "COMPLETED" ? " — транзакция завершена" : ""}`
+            ? `Подпись ${newApproved.length}/${REQUIRED_SIGNATURES}${newStatus === "COMPLETED" ? " — транзакция исполнена" : ""}`
             : `Отклонение${newStatus === "REJECTED" ? " — транзакция отклонена" : ""}`,
         })
       },

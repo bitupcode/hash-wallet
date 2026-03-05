@@ -14,6 +14,8 @@ export type TransactionStatus =
 
 export type TransactionType = "INTERNAL" | "EXTERNAL"
 
+export type TransactionDirection = "INBOUND" | "OUTBOUND"
+
 export type SignerRole = "signer1" | "signer2" | "signer3"
 
 export interface Address {
@@ -38,15 +40,17 @@ export interface MpcSession {
 export interface Transaction {
   id: string
   type: TransactionType
+  direction?: TransactionDirection
   fromAddressId: string
   fromAddress: string
+  fromAddresses?: string[]
   toAddress: string
   amount: number
   fee: number
   status: TransactionStatus
   txHash: string | null
-  kytScore: number | null
   comment: string
+  initiatorName: string
   mpcSessionId: string | null
   createdAt: string
   updatedAt: string
@@ -76,6 +80,14 @@ export const ROLE_NAMES: Record<Role, string> = {
   signer2: "Signer 2",
 }
 
+// ФИО по ролям (мок)
+export const ROLE_FULL_NAMES: Record<Role | SignerRole, string> = {
+  operator: "Соколова Е.А.",
+  signer1: "Петров И.В.",
+  signer2: "Кузнецова М.Д.",
+  signer3: "Волков А.С.",
+}
+
 export const SIGNER_NAMES: Record<SignerRole, string> = {
   signer1: "Signer 1",
   signer2: "Signer 2",
@@ -86,7 +98,7 @@ export const STATUS_LABELS: Record<TransactionStatus, string> = {
   DRAFT: "Черновик",
   WAITING_MPC: "Ожидание подписей",
   MPC_SIGNING: "Подписание",
-  COMPLETED: "Завершена",
+  COMPLETED: "Исполнена",
   REJECTED: "Отклонена",
   FAILED: "Ошибка",
 }

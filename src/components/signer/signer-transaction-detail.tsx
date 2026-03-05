@@ -82,11 +82,11 @@ export function SignerTransactionDetail({
           <div className="space-y-3 text-sm">
             <div className="flex justify-between items-center">
               <span className="text-muted-foreground">Отправитель</span>
-              <BtcAddress address={transaction.fromAddress} />
+              <BtcAddress address={transaction.fromAddress} full />
             </div>
             <div className="flex justify-between items-center">
               <span className="text-muted-foreground">Получатель</span>
-              <BtcAddress address={transaction.toAddress} />
+              <BtcAddress address={transaction.toAddress} full />
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Тип</span>
@@ -107,19 +107,6 @@ export function SignerTransactionDetail({
                 {formatBtc(transaction.amount + transaction.fee)} BTC
               </span>
             </div>
-
-            {transaction.kytScore !== null && (
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">KYT Score</span>
-                <span
-                  className={
-                    transaction.kytScore <= 20 ? "text-green-600" : "text-red-600"
-                  }
-                >
-                  {transaction.kytScore}%
-                </span>
-              </div>
-            )}
 
             {transaction.comment && (
               <div className="flex justify-between">

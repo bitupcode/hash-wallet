@@ -41,7 +41,3 @@ export function mockDelay(ms?: number): Promise<void> {
   const delay = ms ?? (1000 + Math.random() * 2000)
   return new Promise((resolve) => setTimeout(resolve, delay))
 }
-
-export function generateKytScore(): number {
-  return Math.floor(Math.random() * 100) + 1
-}
