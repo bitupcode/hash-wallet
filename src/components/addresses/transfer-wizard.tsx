@@ -147,7 +147,7 @@ export function TransferWizard({
                       setToAddress(e.target.value)
                       setShowDropdown(true)
                     }}
-                    onFocus={() => setShowDropdown(true)}
+                    onClick={() => setShowDropdown(true)}
                     onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
                   />
                   {showDropdown && toAddress.length === 0 && otherAddresses.length > 0 && (
