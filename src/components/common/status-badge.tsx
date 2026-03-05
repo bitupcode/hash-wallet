@@ -5,12 +5,12 @@ import type { TransactionStatus } from "@/types"
 import { STATUS_LABELS } from "@/types"
 
 const statusStyles: Record<TransactionStatus, string> = {
-  DRAFT: "bg-transparent text-gray-600 border-gray-300",
-  WAITING_MPC: "bg-transparent text-amber-600 border-amber-400",
-  MPC_SIGNING: "bg-transparent text-blue-600 border-blue-400",
-  COMPLETED: "bg-transparent text-green-600 border-green-400",
-  REJECTED: "bg-transparent text-red-500 border-red-400",
-  FAILED: "bg-transparent text-red-700 border-red-500",
+  DRAFT: "bg-gray-50 text-gray-600 border-gray-300",
+  WAITING_MPC: "bg-amber-50 text-amber-600 border-amber-300",
+  MPC_SIGNING: "bg-blue-50 text-blue-600 border-blue-300",
+  COMPLETED: "bg-green-50 text-green-600 border-green-300",
+  REJECTED: "bg-red-50 text-red-500 border-red-300",
+  FAILED: "bg-red-50 text-red-700 border-red-400",
 }
 
 export function StatusBadge({ status }: { status: TransactionStatus }) {

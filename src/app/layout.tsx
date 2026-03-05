@@ -1,13 +1,13 @@
 import type { Metadata } from "next"
-import { Geist, Geist_Mono } from "next/font/google"
+import { Inter, Geist_Mono } from "next/font/google"
 import { Toaster } from "sonner"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { AppShell } from "@/components/layout/app-shell"
 import "./globals.css"
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin", "cyrillic"],
 })
 
 const geistMono = Geist_Mono({
@@ -28,7 +28,7 @@ export default function RootLayout({
   return (
     <html lang="ru">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${inter.variable} ${geistMono.variable} antialiased`}
       >
         <TooltipProvider>
           <AppShell>{children}</AppShell>
