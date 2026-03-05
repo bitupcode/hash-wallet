@@ -112,14 +112,14 @@ export function TransactionDetailModal({
             </div>
 
             {/* Отправитель */}
-            <div className="flex justify-between items-start">
-              <span className="text-muted-foreground">Отправитель</span>
-              <div className="text-right">
+            <div className="space-y-1">
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">Отправитель</span>
                 {fromAddrObj && (
-                  <div className="text-xs text-muted-foreground mb-0.5">
-                    {fromAddrObj.name}
-                  </div>
+                  <span className="text-sm">{fromAddrObj.name}</span>
                 )}
+              </div>
+              <div className="text-right">
                 <BtcAddress address={transaction.fromAddress} full />
               </div>
             </div>
@@ -141,14 +141,14 @@ export function TransactionDetailModal({
             )}
 
             {/* Получатель */}
-            <div className="flex justify-between items-start">
-              <span className="text-muted-foreground">Получатель</span>
-              <div className="text-right">
+            <div className="space-y-1">
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">Получатель</span>
                 {toAddrObj && (
-                  <div className="text-xs text-muted-foreground mb-0.5">
-                    {toAddrObj.name}
-                  </div>
+                  <span className="text-sm">{toAddrObj.name}</span>
                 )}
+              </div>
+              <div className="text-right">
                 <BtcAddress address={transaction.toAddress} full />
               </div>
             </div>
