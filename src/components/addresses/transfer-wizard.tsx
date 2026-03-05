@@ -114,7 +114,7 @@ export function TransferWizard({
   return (
     <>
       <Dialog open={open} onOpenChange={handleClose}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg w-full min-h-[520px] flex flex-col">
           <DialogHeader>
             <DialogTitle>
               Перевод средств — Шаг {step}/2
@@ -122,7 +122,7 @@ export function TransferWizard({
           </DialogHeader>
 
           {step === 1 && (
-            <div className="space-y-4 py-2">
+            <div className="space-y-4 py-2 flex-1">
               <div className="text-sm text-muted-foreground">
                 Отправитель:{" "}
                 <span className="font-medium text-foreground">
@@ -255,16 +255,30 @@ export function TransferWizard({
           )}
 
           {step === 2 && (
-            <div className="space-y-3 py-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Отправитель</span>
-                <span className="font-medium">{sourceAddress.name}</span>
+            <div className="space-y-3 py-2 text-sm flex-1">
+              <div className="space-y-1">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Отправитель</span>
+                  <span className="font-medium">{sourceAddress.name}</span>
+                </div>
+                <div className="text-right">
+                  <span className="font-mono text-xs text-muted-foreground break-all">
+                    {sourceAddress.address}
+                  </span>
+                </div>
               </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Получатель</span>
-                <span className="font-mono text-xs truncate max-w-[180px]">
-                  {toAddress.slice(0, 16)}...
-                </span>
+              <div className="space-y-1">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Получатель</span>
+                  {matchedAddress && (
+                    <span className="font-medium">{matchedAddress.name}</span>
+                  )}
+                </div>
+                <div className="text-right">
+                  <span className="font-mono text-xs text-muted-foreground break-all">
+                    {toAddress}
+                  </span>
+                </div>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Тип</span>
