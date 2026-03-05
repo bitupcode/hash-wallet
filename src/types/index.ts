@@ -64,6 +64,7 @@ export interface AuditLogEntry {
 
 // Constants
 export const NETWORK_FEE = 0.0005
+export const DUST_RESERVE = 0.0001
 export const MPC_DEADLINE_MINUTES = 5
 export const REQUIRED_SIGNATURES = 2
 export const TOTAL_SIGNERS = 3

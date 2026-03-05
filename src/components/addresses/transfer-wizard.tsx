@@ -18,7 +18,7 @@ import { Loader2 } from "lucide-react"
 import { ConfirmDialog } from "@/components/common/confirm-dialog"
 import { useAddressStore, useTransactionStore } from "@/store"
 import { formatBtc, mockDelay, generateKytScore } from "@/lib/utils"
-import { NETWORK_FEE } from "@/types"
+import { NETWORK_FEE, DUST_RESERVE } from "@/types"
 import type { Address } from "@/types"
 import { toast } from "sonner"
 
@@ -26,6 +26,18 @@ interface TransferWizardProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   sourceAddress: Address
+}
+
+function isValidBtcAddress(address: string): boolean {
+  // Legacy (1...)
+  if (/^1[a-km-zA-HJ-NP-Z1-9]{25,34}$/.test(address)) return true
+  // P2SH (3...)
+  if (/^3[a-km-zA-HJ-NP-Z1-9]{25,34}$/.test(address)) return true
+  // Bech32 (bc1q...)
+  if (/^bc1q[a-z0-9]{38,58}$/.test(address)) return true
+  // Bech32m / Taproot (bc1p...)
+  if (/^bc1p[a-z0-9]{38,58}$/.test(address)) return true
+  return false
 }
 
 export function TransferWizard({
@@ -47,23 +59,31 @@ export function TransferWizard({
   const createTransaction = useTransactionStore((s) => s.createTransaction)
 
   const otherAddresses = addresses.filter((a) => a.id !== sourceAddress.id)
-  const maxAmount = Math.max(0, sourceAddress.balance - NETWORK_FEE)
+  const maxAmount = Math.max(0, sourceAddress.balance - NETWORK_FEE - DUST_RESERVE)
   const amountNum = parseFloat(amount) || 0
-
-  const errors: string[] = []
-  if (amountNum <= 0 && amount.length > 0) errors.push("Сумма должна быть больше 0")
-  if (amountNum + NETWORK_FEE > sourceAddress.balance)
-    errors.push("Недостаточно средств (сумма + комиссия)")
-  if (toAddress === sourceAddress.address)
-    errors.push("Нельзя отправить на тот же адрес")
-
-  const canProceed =
-    toAddress.trim().length > 0 &&
-    amountNum > 0 &&
-    amountNum + NETWORK_FEE <= sourceAddress.balance &&
-    toAddress !== sourceAddress.address
+  const totalDeduction = amountNum + NETWORK_FEE
 
   const isInternal = addresses.some((a) => a.address === toAddress)
+
+  // Validation
+  const errors: string[] = []
+  if (amountNum <= 0 && amount.length > 0) errors.push("Сумма должна быть больше 0")
+  if (amountNum > 0 && totalDeduction > sourceAddress.balance)
+    errors.push("Недостаточно средств (сумма + комиссия > баланс)")
+  if (toAddress === sourceAddress.address)
+    errors.push("Нельзя отправить на тот же адрес")
+  if (toAddress.trim().length > 0 && !isInternal && !isValidBtcAddress(toAddress))
+    errors.push("Неверный формат адреса для сети Bitcoin")
+
+  const addressValid =
+    toAddress.trim().length > 0 &&
+    toAddress !== sourceAddress.address &&
+    (isInternal || isValidBtcAddress(toAddress))
+
+  const canProceed =
+    addressValid &&
+    amountNum > 0 &&
+    totalDeduction <= sourceAddress.balance
 
   const reset = () => {
     setStep(1)
@@ -138,11 +158,12 @@ export function TransferWizard({
               </div>
               <Separator />
 
+              {/* Адрес получателя */}
               <div className="space-y-2">
                 <Label>Адрес получателя</Label>
                 <div className="relative">
                   <Input
-                    placeholder="Bitcoin-адрес..."
+                    placeholder="Bitcoin-адрес (bc1q..., 1..., 3...)"
                     value={toAddress}
                     onChange={(e) => {
                       setToAddress(e.target.value)
@@ -171,11 +192,17 @@ export function TransferWizard({
                     </div>
                   )}
                 </div>
+                {toAddress.trim().length > 0 && !isInternal && !isValidBtcAddress(toAddress) && (
+                  <p className="text-sm text-destructive">
+                    Неверный формат адреса для сети Bitcoin
+                  </p>
+                )}
               </div>
 
+              {/* Сумма к получению */}
               <div className="space-y-2">
-                <Label>Сумма (BTC)</Label>
-                <div className="flex gap-2">
+                <Label>Сумма к получению (BTC)</Label>
+                <div className="flex gap-2 items-center">
                   <Input
                     type="number"
                     step="0.00000001"
@@ -184,6 +211,9 @@ export function TransferWizard({
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
                   />
+                  <span className="text-xs text-muted-foreground whitespace-nowrap">
+                    Доступно: {formatBtc(sourceAddress.balance)}
+                  </span>
                   <Button
                     variant="outline"
                     size="sm"
@@ -194,17 +224,40 @@ export function TransferWizard({
                 </div>
               </div>
 
+              {/* Комиссия сети (read-only) */}
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Комиссия сети</span>
+                <span className="font-mono">{formatBtc(NETWORK_FEE)} BTC</span>
+              </div>
+
+              {/* Сумма списания (read-only) */}
+              {amountNum > 0 && (
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground font-medium">Сумма списания</span>
+                  <span
+                    className={`font-mono font-semibold ${
+                      totalDeduction > sourceAddress.balance ? "text-destructive" : "text-foreground"
+                    }`}
+                  >
+                    {formatBtc(totalDeduction)} BTC
+                  </span>
+                </div>
+              )}
+
+              {/* Комментарий */}
               <div className="space-y-2">
-                <Label>Комментарий</Label>
+                <div className="flex items-center justify-between">
+                  <Label>Комментарий</Label>
+                  <span className="text-xs text-muted-foreground">
+                    {comment.length}/255
+                  </span>
+                </div>
                 <Textarea
                   placeholder="Причина перевода..."
                   value={comment}
+                  maxLength={255}
                   onChange={(e) => setComment(e.target.value)}
                 />
-              </div>
-
-              <div className="text-sm text-muted-foreground">
-                Комиссия сети: <span className="font-mono">{formatBtc(NETWORK_FEE)} BTC</span>
               </div>
 
               {errors.length > 0 && (
@@ -281,17 +334,17 @@ export function TransferWizard({
               </div>
               <Separator />
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Сумма</span>
+                <span className="text-muted-foreground">Сумма к получению</span>
                 <span className="font-mono">{formatBtc(amountNum)} BTC</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Комиссия</span>
+                <span className="text-muted-foreground">Комиссия сети</span>
                 <span className="font-mono">{formatBtc(NETWORK_FEE)} BTC</span>
               </div>
               <div className="flex justify-between font-semibold">
-                <span>Итого</span>
+                <span>Сумма списания</span>
                 <span className="font-mono">
-                  {formatBtc(amountNum + NETWORK_FEE)} BTC
+                  {formatBtc(totalDeduction)} BTC
                 </span>
               </div>
               <Separator />
@@ -354,7 +407,7 @@ export function TransferWizard({
         open={showConfirm}
         onOpenChange={setShowConfirm}
         title="Подтвердить перевод?"
-        description={`Перевод ${formatBtc(amountNum)} BTC будет отправлен на подписание.`}
+        description={`Перевод ${formatBtc(amountNum)} BTC будет отправлен на подписание. Сумма списания: ${formatBtc(totalDeduction)} BTC.`}
         confirmLabel="Подтвердить"
         onConfirm={handleSubmit}
       />
