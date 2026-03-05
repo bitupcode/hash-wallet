@@ -124,13 +124,13 @@ export function TransferWizard({
             <div className="space-y-4 py-2">
               <div className="text-sm text-muted-foreground">
                 Отправитель:{" "}
-                <span className="font-mono font-medium text-foreground">
+                <span className="font-medium text-foreground">
                   {sourceAddress.name}
                 </span>
               </div>
               <div className="text-sm text-muted-foreground">
                 Доступный баланс:{" "}
-                <span className="font-mono font-medium text-foreground">
+                <span className="font-medium text-foreground">
                   {formatBtc(sourceAddress.balance)} BTC
                 </span>
               </div>
@@ -205,7 +205,7 @@ export function TransferWizard({
               {/* Комиссия сети (read-only) */}
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">Комиссия сети</span>
-                <span className="font-mono">{formatBtc(NETWORK_FEE)} BTC</span>
+                <span className="font-medium">{formatBtc(NETWORK_FEE)} BTC</span>
               </div>
 
               {/* Сумма списания (read-only) */}
@@ -213,7 +213,7 @@ export function TransferWizard({
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground font-medium">Сумма списания</span>
                   <span
-                    className={`font-mono font-semibold ${
+                    className={`font-semibold ${
                       totalDeduction > sourceAddress.balance ? "text-destructive" : "text-foreground"
                     }`}
                   >
@@ -252,11 +252,11 @@ export function TransferWizard({
             <div className="space-y-3 py-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Отправитель</span>
-                <span className="font-mono">{sourceAddress.name}</span>
+                <span className="font-medium">{sourceAddress.name}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Получатель</span>
-                <span className="font-mono text-xs">
+                <span className="font-mono text-xs truncate max-w-[180px]">
                   {toAddress.slice(0, 16)}...
                 </span>
               </div>
@@ -269,15 +269,15 @@ export function TransferWizard({
               <Separator />
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Сумма к получению</span>
-                <span className="font-mono">{formatBtc(amountNum)} BTC</span>
+                <span className="font-medium">{formatBtc(amountNum)} BTC</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Комиссия сети</span>
-                <span className="font-mono">{formatBtc(NETWORK_FEE)} BTC</span>
+                <span className="font-medium">{formatBtc(NETWORK_FEE)} BTC</span>
               </div>
               <div className="flex justify-between font-semibold">
                 <span>Сумма списания</span>
-                <span className="font-mono">
+                <span>
                   {formatBtc(totalDeduction)} BTC
                 </span>
               </div>

@@ -163,7 +163,7 @@ export function TransactionTable() {
                   <TableCell>
                     <StatusBadge status={tx.status} />
                   </TableCell>
-                  <TableCell className="font-mono">
+                  <TableCell className="font-medium">
                     {formatBtc(tx.amount)}
                   </TableCell>
                 </TableRow>

@@ -110,7 +110,7 @@ export function AddressTransactions({ addressId }: AddressTransactionsProps) {
                   <TableCell>
                     <StatusBadge status={tx.status} />
                   </TableCell>
-                  <TableCell className="font-mono">{formatBtc(tx.amount)}</TableCell>
+                  <TableCell className="font-medium">{formatBtc(tx.amount)}</TableCell>
                 </TableRow>
               )
             })}

@@ -80,7 +80,7 @@ export function SignerQueue() {
                   <TableCell>
                     <Badge variant="outline">{tx.type}</Badge>
                   </TableCell>
-                  <TableCell className="font-mono">
+                  <TableCell className="font-medium">
                     {formatBtc(tx.amount)}
                   </TableCell>
                   <TableCell>

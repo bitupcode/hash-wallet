@@ -60,7 +60,7 @@ export function AddressDetail({ address }: AddressDetailProps) {
           </div>
           <div>
             <div className="text-sm text-muted-foreground mb-1">Баланс</div>
-            <div className="text-3xl font-bold font-mono">
+            <div className="text-3xl font-bold">
               {formatBtc(current.balance)} <span className="text-lg text-muted-foreground">BTC</span>
             </div>
           </div>

@@ -95,15 +95,15 @@ export function SignerTransactionDetail({
             <Separator />
             <div className="flex justify-between">
               <span className="text-muted-foreground">Сумма</span>
-              <span className="font-mono">{formatBtc(transaction.amount)} BTC</span>
+              <span className="font-medium">{formatBtc(transaction.amount)} BTC</span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Комиссия</span>
-              <span className="font-mono">{formatBtc(transaction.fee)} BTC</span>
+              <span className="font-medium">{formatBtc(transaction.fee)} BTC</span>
             </div>
             <div className="flex justify-between font-semibold">
               <span>Итого</span>
-              <span className="font-mono">
+              <span className="font-medium">
                 {formatBtc(transaction.amount + transaction.fee)} BTC
               </span>
             </div>
