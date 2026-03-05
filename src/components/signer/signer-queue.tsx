@@ -44,7 +44,7 @@ export function SignerQueue() {
 
   return (
     <div className="space-y-4">
-      <div className="border rounded-lg">
+      <div className="bg-white rounded-2xl overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>

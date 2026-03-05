@@ -101,7 +101,11 @@ export function TransactionTable() {
         onDateToChange={(v) => { setDateTo(v); setPage(0) }}
       />
 
-      <div className="border rounded-lg">
+      <div className="text-sm text-muted-foreground">
+        Всего <span className="font-semibold text-foreground">{filtered.length}</span>
+      </div>
+
+      <div className="bg-white rounded-2xl overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>

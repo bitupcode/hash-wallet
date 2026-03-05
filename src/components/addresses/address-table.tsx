@@ -16,7 +16,7 @@ import { CreateAddressDialog } from "./create-address-dialog"
 import { EmptyState } from "@/components/common/empty-state"
 import { CopyButton } from "@/components/common/copy-button"
 import { useAddressStore } from "@/store"
-import { Plus, Wallet, ArrowUpDown } from "lucide-react"
+import { Wallet, ArrowUpDown } from "lucide-react"
 
 type SortField = "name" | "createdAt"
 type SortDir = "asc" | "desc"
@@ -103,15 +103,19 @@ export function AddressTable() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <Button onClick={() => setShowCreate(true)}>
+        Создать адрес
+      </Button>
+
+      <div className="flex items-center gap-3">
         <AddressSearch onSearch={handleSearch} />
-        <Button onClick={() => setShowCreate(true)}>
-          <Plus className="size-4 mr-1" />
-          Создать адрес
-        </Button>
       </div>
 
-      <div className="border rounded-lg">
+      <div className="text-sm text-muted-foreground">
+        Всего <span className="font-semibold text-foreground">{filtered.length}</span>
+      </div>
+
+      <div className="bg-white rounded-2xl overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>

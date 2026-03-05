@@ -24,7 +24,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </div>
       <div className="flex flex-col flex-1 overflow-hidden">
         <Header />
-        <main className="flex-1 overflow-auto p-6">{children}</main>
+        <main className="flex-1 overflow-auto p-6 bg-background">{children}</main>
       </div>
     </div>
   )

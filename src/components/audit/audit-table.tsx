@@ -50,7 +50,7 @@ export function AuditTable() {
 
   return (
     <div className="space-y-4">
-      <div className="relative w-72">
+      <div className="relative w-80">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
         <Input
           placeholder="Поиск..."
@@ -60,7 +60,7 @@ export function AuditTable() {
         />
       </div>
 
-      <div className="border rounded-lg">
+      <div className="bg-white rounded-2xl overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>
