@@ -57,7 +57,8 @@ export function TransferWizard({
   const amountNum = parseFloat(amount) || 0
   const totalDeduction = amountNum + NETWORK_FEE
 
-  const isInternal = addresses.some((a) => a.address === toAddress)
+  const matchedAddress = addresses.find((a) => a.address === toAddress)
+  const isInternal = !!matchedAddress
 
   const errors: string[] = []
   if (amountNum <= 0 && amount.length > 0) errors.push("Сумма должна быть больше 0")
@@ -170,6 +171,11 @@ export function TransferWizard({
                     </div>
                   )}
                 </div>
+                {matchedAddress && (
+                  <p className="text-sm text-muted-foreground">
+                    {matchedAddress.name}
+                  </p>
+                )}
                 {toAddress.trim().length > 0 && !isInternal && !isValidBtcAddress(toAddress) && (
                   <p className="text-sm text-destructive">
                     Неверный формат адреса для сети Bitcoin
