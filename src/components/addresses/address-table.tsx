@@ -16,6 +16,7 @@ import { CreateAddressDialog } from "./create-address-dialog"
 import { EmptyState } from "@/components/common/empty-state"
 import { CopyButton } from "@/components/common/copy-button"
 import { useAddressStore } from "@/store"
+import { TablePagination } from "@/components/common/table-pagination"
 import { Wallet, ArrowUpDown } from "lucide-react"
 
 type SortField = "name" | "createdAt"
@@ -147,29 +148,12 @@ export function AddressTable() {
         </Table>
       </div>
 
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={page === 0}
-            onClick={() => setPage((p) => p - 1)}
-          >
-            Назад
-          </Button>
-          <span className="text-sm text-muted-foreground">
-            {page + 1} / {totalPages}
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={page >= totalPages - 1}
-            onClick={() => setPage((p) => p + 1)}
-          >
-            Вперёд
-          </Button>
-        </div>
-      )}
+      <TablePagination
+        page={page}
+        totalPages={totalPages}
+        pageSize={PAGE_SIZE}
+        onPageChange={setPage}
+      />
 
       <CreateAddressDialog open={showCreate} onOpenChange={setShowCreate} />
     </div>

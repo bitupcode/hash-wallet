@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { EmptyState } from "@/components/common/empty-state"
 import { useAuditStore } from "@/store"
+import { TablePagination } from "@/components/common/table-pagination"
 import { Search, FileText } from "lucide-react"
 
 const PAGE_SIZE = 20
@@ -95,29 +96,12 @@ export function AuditTable() {
         </Table>
       </div>
 
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={page === 0}
-            onClick={() => setPage((p) => p - 1)}
-          >
-            Назад
-          </Button>
-          <span className="text-sm text-muted-foreground">
-            {page + 1} / {totalPages}
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={page >= totalPages - 1}
-            onClick={() => setPage((p) => p + 1)}
-          >
-            Вперёд
-          </Button>
-        </div>
-      )}
+      <TablePagination
+        page={page}
+        totalPages={totalPages}
+        pageSize={PAGE_SIZE}
+        onPageChange={setPage}
+      />
     </div>
   )
 }

@@ -17,6 +17,7 @@ import { TransactionDetailModal } from "./transaction-detail-modal"
 import { EmptyState } from "@/components/common/empty-state"
 import { useTransactionStore } from "@/store"
 import { formatBtc } from "@/lib/utils"
+import { TablePagination } from "@/components/common/table-pagination"
 import { History, ArrowUpRight, ArrowDownLeft, ArrowLeftRight } from "lucide-react"
 import type { Transaction, TransactionStatus, TransactionType } from "@/types"
 
@@ -172,29 +173,12 @@ export function TransactionTable() {
         </Table>
       </div>
 
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={page === 0}
-            onClick={() => setPage((p) => p - 1)}
-          >
-            Назад
-          </Button>
-          <span className="text-sm text-muted-foreground">
-            {page + 1} / {totalPages}
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={page >= totalPages - 1}
-            onClick={() => setPage((p) => p + 1)}
-          >
-            Вперёд
-          </Button>
-        </div>
-      )}
+      <TablePagination
+        page={page}
+        totalPages={totalPages}
+        pageSize={PAGE_SIZE}
+        onPageChange={setPage}
+      />
 
       <TransactionDetailModal
         transaction={selectedTx}
